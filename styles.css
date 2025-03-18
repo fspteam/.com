@@ -452,7 +452,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: rgba(0, 178, 45, 0.1);
+    background: rgb(220 251 225 / 95%);
     border-radius: 50px;
     color: var(--primary-color);
     font-weight: 500;
