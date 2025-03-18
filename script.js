@@ -1,8 +1,7 @@
 // DOM Elements
 const navbar = document.querySelector('.navbar');
-const menuToggle = document.querySelector('.mobile-menu-btn');
+const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
-const authButtons = document.querySelector('.auth-buttons');
 
 // Navigation Functions
 function handleNavScroll() {
@@ -14,24 +13,30 @@ function handleNavScroll() {
 }
 
 function toggleMobileMenu() {
-    // Toggle menu icon
-    const menuIcon = menuToggle.querySelector('i');
-    menuIcon.classList.toggle('fa-bars');
-    menuIcon.classList.toggle('fa-times');
-    
-    // Toggle menu and auth buttons
+    menuToggle.classList.toggle('active');
     navLinks.classList.toggle('active');
-    authButtons.classList.toggle('active');
     
-    // Toggle body scroll
-    document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+    // Use position: fixed on body instead of overflow: hidden
+    document.body.classList.toggle('menu-open');
 }
+
+// Prevent scroll on touchmove when menu is open
+function preventScroll(e) {
+    if (navLinks.classList.contains('active')) {
+        e.preventDefault();
+    }
+}
+
+// Clean up event listener when navigating away
+window.addEventListener('beforeunload', () => {
+    document.removeEventListener('touchmove', preventScroll);
+});
 
 // Close mobile menu when clicking outside
 document.addEventListener('click', (e) => {
     if (navLinks.classList.contains('active') && 
         !e.target.closest('.nav-links') && 
-        !e.target.closest('.mobile-menu-btn')) {
+        !e.target.closest('.menu-toggle')) {
         toggleMobileMenu();
     }
 });
@@ -870,6 +875,70 @@ document.querySelectorAll('.plan-button span').forEach(button => {
             }
         }, 800); // Small delay to ensure smooth scroll completes
     });
+});
+
+// Form validation
+const contactForm = document.getElementById('contactForm');
+const socialInputs = document.querySelectorAll('.social-input');
+
+function validateSocialUrl(url, platform) {
+    if (!url) return true; // Optional field
+    
+    const patterns = {
+        linkedin: /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?$/,
+        twitter: /^https?:\/\/(www\.)?twitter\.com\/[\w-]+\/?$/
+    };
+    
+    return patterns[platform].test(url);
+}
+
+function showInputError(input, message) {
+    const formGroup = input.parentElement;
+    const errorDiv = formGroup.querySelector('.error-message') || document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    if (!formGroup.querySelector('.error-message')) {
+        formGroup.appendChild(errorDiv);
+    }
+    input.classList.add('error');
+}
+
+function clearInputError(input) {
+    const formGroup = input.parentElement;
+    const errorDiv = formGroup.querySelector('.error-message');
+    if (errorDiv) {
+        formGroup.removeChild(errorDiv);
+    }
+    input.classList.remove('error');
+}
+
+socialInputs.forEach(input => {
+    input.addEventListener('input', () => {
+        const platform = input.id;
+        const isValid = validateSocialUrl(input.value, platform);
+        
+        if (!isValid && input.value) {
+            showInputError(input, `Please enter a valid ${platform} profile URL`);
+        } else {
+            clearInputError(input);
+        }
+    });
+});
+
+contactForm.addEventListener('submit', function(e) {
+    let hasErrors = false;
+    
+    socialInputs.forEach(input => {
+        const platform = input.id;
+        if (input.value && !validateSocialUrl(input.value, platform)) {
+            showInputError(input, `Please enter a valid ${platform} profile URL`);
+            hasErrors = true;
+        }
+    });
+    
+    if (hasErrors) {
+        e.preventDefault();
+    }
 });
 
 // Add these functions to your existing script.js
