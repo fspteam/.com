@@ -215,8 +215,37 @@ function initPortfolioFilter() {
     const filterButtons = document.querySelectorAll('.filter-btn');
     const portfolioItems = document.querySelectorAll('.portfolio-item');
     const portfolioGrid = document.querySelector('.portfolio-grid');
+    const leftBtn = document.querySelector('.portfolio-container .scroll-btn.left');
+    const rightBtn = document.querySelector('.portfolio-container .scroll-btn.right');
 
-    if (!filterButtons.length || !portfolioItems.length) return;
+    if (!filterButtons.length || !portfolioItems.length || !portfolioGrid) return;
+
+    // Update scroll buttons visibility
+    function updateScrollButtons() {
+        if (leftBtn && rightBtn) {
+            leftBtn.classList.toggle('visible', portfolioGrid.scrollLeft > 0);
+            rightBtn.classList.toggle('visible', 
+                portfolioGrid.scrollLeft < (portfolioGrid.scrollWidth - portfolioGrid.clientWidth - 10));
+        }
+    }
+
+    // Initialize scroll buttons
+    if (leftBtn && rightBtn) {
+        leftBtn.addEventListener('click', () => {
+            portfolioGrid.scrollBy({ left: -300, behavior: 'smooth' });
+        });
+
+        rightBtn.addEventListener('click', () => {
+            portfolioGrid.scrollBy({ left: 300, behavior: 'smooth' });
+        });
+
+        // Add scroll event listener
+        portfolioGrid.addEventListener('scroll', updateScrollButtons);
+        window.addEventListener('resize', updateScrollButtons);
+
+        // Initial check
+        updateScrollButtons();
+    }
 
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -244,36 +273,11 @@ function initPortfolioFilter() {
                 }
             });
 
-            // Reset scroll position
+            // Reset scroll position and update buttons
             portfolioGrid.scrollLeft = 0;
+            updateScrollButtons();
         });
     });
-
-    // Initialize scroll buttons
-    const leftBtn = document.querySelector('.portfolio-container .scroll-btn.left');
-    const rightBtn = document.querySelector('.portfolio-container .scroll-btn.right');
-
-    if (leftBtn && rightBtn) {
-        const updateScrollButtons = () => {
-            leftBtn.classList.toggle('visible', portfolioGrid.scrollLeft > 0);
-            rightBtn.classList.toggle('visible', 
-                portfolioGrid.scrollLeft < portfolioGrid.scrollWidth - portfolioGrid.clientWidth);
-        };
-
-        portfolioGrid.addEventListener('scroll', updateScrollButtons);
-        window.addEventListener('resize', updateScrollButtons);
-
-        leftBtn.addEventListener('click', () => {
-            portfolioGrid.scrollBy({ left: -300, behavior: 'smooth' });
-        });
-
-        rightBtn.addEventListener('click', () => {
-            portfolioGrid.scrollBy({ left: 300, behavior: 'smooth' });
-        });
-
-        // Initial check
-        updateScrollButtons();
-    }
 }
 
 // Pricing Tabs
@@ -532,6 +536,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initPricingTabs();
     initFAQ();
     initCustomPlanBuilder();
+    initPortfolioFilter();
+    initTeamSection(); // Added team section initialization
 });
 
 // Services Section Initialization
@@ -1042,3 +1048,44 @@ function updateTotal() {
     
     totalPrice.textContent = `$${total}`;
 } 
+
+// Wait for the Tawk.to API to load before using
+document.addEventListener('DOMContentLoaded', function () {
+    // Trigger to open or close the widget
+    const chatButton = document.getElementById("TawkChatButton");
+    const chatWidget = document.getElementById("TawkChat");
+    const closeButton = document.createElement('button');
+    
+    // Close button for the chat widget
+    closeButton.innerHTML = "X";
+    closeButton.classList.add("close-chat-btn");
+    chatWidget.appendChild(closeButton);
+
+    // Show the chat widget
+    chatButton.addEventListener("click", function () {
+        if (chatWidget.classList.contains("show")) {
+            chatWidget.classList.remove("show");
+            chatWidget.classList.add("minimized");
+        } else {
+            chatWidget.classList.add("show");
+            chatWidget.classList.remove("minimized");
+        }
+    });
+
+    // Close the chat widget when the close button is clicked
+    closeButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        chatWidget.classList.remove("show");
+        chatWidget.classList.add("minimized");
+    });
+});
+
+// Ensure the Tawk.to script is loaded and initialized properly
+(function() {
+    var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+    s1.async = true;
+    s1.src = 'https://embed.tawk.to/67d88740f6512c1906a7d374/1imit0l6f';  // Replace with your Tawk.to embed URL
+    s1.charset = 'UTF-8';
+    s1.setAttribute('crossorigin', '*');
+    s0.parentNode.insertBefore(s1, s0);
+})();
